@@ -3,6 +3,8 @@
 
 项目地址： https://github.com/hengyunabc/douyu-helper
 
+交流QQ群： 312383777
+
 ## 功能
 
 录制斗鱼直播的视频，支持同理录制多个房间，支持自动重试。
