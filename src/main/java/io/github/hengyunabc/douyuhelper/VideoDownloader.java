@@ -71,7 +71,7 @@ public class VideoDownloader {
         }
 
         int downloadedSize = 0;
-        logger.info("开始下载房间：{}，url: {}", room, url);
+        System.out.println("开始下载房间：" + room + "，url: " + url);
         try (CloseableHttpResponse response = httpclient.execute(new HttpGet(url))) {
 
           if (response.getStatusLine().getStatusCode() == 200) {
@@ -82,58 +82,32 @@ public class VideoDownloader {
               Paths.get("video", room).toFile().mkdirs();
               Path path = Paths.get("video", room, simpleDateFormat.format(new Date()) + ".flv");
               File flvFile = path.toFile();
-              FileOutputStream outstream = new FileOutputStream(flvFile);
-              byte[] buffer = new byte[128 * 1024];
-              int size = 0;
+              try (FileOutputStream outstream = new FileOutputStream(flvFile);) {
+                byte[] buffer = new byte[128 * 1024];
+                int size = 0;
 
-              Date last = new Date();
-              while ((size = inputStream.read(buffer)) != -1) {
-                outstream.write(buffer, 0, size);
-                downloadedSize += size;
-                Date now = new Date();
-                if (((now.getTime() - last.getTime()) / 1000) >= 5) {
-                  logger.info("正在下载房间：{}，已下载: {}", room, downloadedSize);
-                  last = now;
+                Date last = new Date();
+                while ((size = inputStream.read(buffer)) != -1) {
+                  outstream.write(buffer, 0, size);
+                  downloadedSize += size;
+                  Date now = new Date();
+                  if (((now.getTime() - last.getTime()) / 1000) >= 5) {
+                    System.out.println("正在下载房间：" + room + "，已下载大小: " + downloadedSize);
+                    last = now;
+                  }
                 }
               }
-
             }
-
           }
         } catch (Exception e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
         } finally {
           manager.returnDownloadPermit(room);
-          logger.info("结束下载房间：{}，url: {}", room, url);
+          System.out.println("结束下载房间：" + room + "，url: " + url);
         }
       }
     });
-  }
-
-  public static void test() throws ClientProtocolException, IOException {
-    File myFile = new File("mystuff.bin");
-
-    CloseableHttpClient client = HttpClients.createDefault();
-    try (CloseableHttpResponse response =
-        client
-            .execute(new HttpGet(
-                "http://hdl3a.douyutv.com/live/6540rcyiWsxBW8yd_550.flv?wsSecret=127040319200e6b26a82cba954a7f7e8&wsTime=1440905148"))) {
-
-      if (response.getStatusLine().getStatusCode() == 200) {
-        HttpEntity entity = response.getEntity();
-        if (entity != null) {
-          InputStream inputStream = entity.getContent();
-          FileOutputStream outstream = new FileOutputStream(myFile);
-          byte[] buffer = new byte[128 * 1024];
-          int size = 0;
-          while ((size = inputStream.read(buffer)) != -1) {
-            outstream.write(buffer, 0, size);
-          }
-        }
-
-      }
-    }
   }
 
 }
