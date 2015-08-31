@@ -38,6 +38,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +47,8 @@ import com.alibaba.fastjson.JSON;
 
 @Service
 public class HttpServer {
+  static final Logger logger = LoggerFactory.getLogger(HttpServer.class);
+
   private String host = "localhost";
   private int port = 67373 % 10000;
 
@@ -92,6 +96,7 @@ public class HttpServer {
                         new QueryStringDecoder(request.content().toString(CharsetUtil.UTF_8), false);
                     List<String> urlList = decoder.parameters().get("url");
                     if (!urlList.isEmpty()) {
+                      logger.info("提交的flv下载url：{}", urlList.get(0));
                       manager.addDownloadUrl(urlList.get(0));
                     }
                   }
@@ -99,6 +104,8 @@ public class HttpServer {
                   // 处理拉取flv的房间名的请求，如果当前有需要，则返回房间名的列表。如果不需要，则返回空数组
                   if (StringUtils.equals(path, "/douyu/video/rooms")) {
                     List<String> rooms = manager.getNeedDownloadRooms();
+                    logger.info("获取的要下载的房间列表：{}", rooms);
+
                     byte[] bytes = JSON.toJSONBytes(rooms);
 
                     DefaultFullHttpResponse response =

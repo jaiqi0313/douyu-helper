@@ -15,7 +15,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -33,8 +32,6 @@ public class VideoDownloader {
 
   ExecutorService executorService = Executors.newCachedThreadPool();
   CloseableHttpClient httpclient;
-
-
 
   @Autowired
   Manager manager;
@@ -71,6 +68,7 @@ public class VideoDownloader {
         }
 
         int downloadedSize = 0;
+        logger.info("开始下载房间：{}, url:{}", room, url);
         System.out.println("开始下载房间：" + room + "，url: " + url);
         try (CloseableHttpResponse response = httpclient.execute(new HttpGet(url))) {
 
@@ -92,6 +90,7 @@ public class VideoDownloader {
                   downloadedSize += size;
                   Date now = new Date();
                   if (((now.getTime() - last.getTime()) / 1000) >= 5) {
+                    logger.info("开始下载房间：{}, 已下载大小:{}", room, downloadedSize);
                     System.out.println("正在下载房间：" + room + "，已下载大小: " + downloadedSize);
                     last = now;
                   }
@@ -104,6 +103,7 @@ public class VideoDownloader {
           e.printStackTrace();
         } finally {
           manager.returnDownloadPermit(room);
+          logger.info("结束下载房间：{}, url:{}", room, url);
           System.out.println("结束下载房间：" + room + "，url: " + url);
         }
       }
