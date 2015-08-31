@@ -1,0 +1,20 @@
+{
+  "name": "斗鱼助手",
+  "version": "1.0",
+  "description": "斗鱼助手",
+  "permissions": ["webRequest", "webRequestBlocking",
+                  "http://*.douyutv.com/live/*",
+                  "http://*/*", 
+                  "https://*/*"
+                  ],
+  "background": {
+    "scripts": ["jquery.js", "background.js"]
+  },
+
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_icon": "favicon.png"
+  },
+  
+  "manifest_version": 2
+}
