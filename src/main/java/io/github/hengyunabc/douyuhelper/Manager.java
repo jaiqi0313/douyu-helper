@@ -45,6 +45,8 @@ public class Manager {
           if (!roomState.isDownloading()) {
             String url = urlCache.getIfPresent(room);
             if (url != null) {
+              //开始任务前，先把前一个下载的url缓存删掉
+              urlCache.invalidate(room);
               videoDownloader.addDownloadTask(room, url);
             }
           }

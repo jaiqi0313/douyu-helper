@@ -1,7 +1,6 @@
 package io.github.hengyunabc.douyuhelper;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
@@ -81,6 +80,11 @@ public class HttpServer {
               }
 
               @Override
+              public void channelReadComplete(ChannelHandlerContext ctx) {
+                ctx.flush();
+              }
+
+              @Override
               protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg)
                   throws Exception {
 
@@ -88,6 +92,9 @@ public class HttpServer {
                   FullHttpRequest request = (FullHttpRequest) msg;
                   URI uri = new URI(request.getUri());
                   String path = uri.getPath();
+
+                  DefaultFullHttpResponse response =
+                      new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
 
                   // 处理提交的flv下载url信息
                   if (StringUtils.equals(path, "/douyu/video/url")
@@ -108,20 +115,17 @@ public class HttpServer {
 
                     byte[] bytes = JSON.toJSONBytes(rooms);
 
-                    DefaultFullHttpResponse response =
-                        new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
-                            Unpooled.wrappedBuffer(bytes));
-                    response.headers().set(Names.CONTENT_TYPE, "text/plain; charset=UTF-8");
-                    response.headers()
-                        .set(Names.CONTENT_LENGTH, response.content().readableBytes());
+                    response.content().writeBytes(bytes);
+                  }
 
-                    boolean keepAlive = HttpHeaders.isKeepAlive(request);
-                    if (!keepAlive) {
-                      ctx.write(response).addListener(ChannelFutureListener.CLOSE);
-                    } else {
-                      response.headers().set(Names.CONNECTION, Values.KEEP_ALIVE);
-                      ctx.writeAndFlush(response);
-                    }
+                  response.headers().set(Names.CONTENT_TYPE, "text/plain; charset=UTF-8");
+                  response.headers().set(Names.CONTENT_LENGTH, response.content().readableBytes());
+                  boolean keepAlive = HttpHeaders.isKeepAlive(request);
+                  if (!keepAlive) {
+                    ctx.write(response).addListener(ChannelFutureListener.CLOSE);
+                  } else {
+                    response.headers().set(Names.CONNECTION, Values.KEEP_ALIVE);
+                    ctx.writeAndFlush(response);
                   }
                 }
               }
