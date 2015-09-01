@@ -98,9 +98,9 @@ public class VideoDownloader {
               }
             }
           }
-        } catch (Exception e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+        } catch (Throwable t) {
+          logger.error("房间下载出错！room:" + room, t);
+          System.out.println("下载房间出错！：" + room + "，url: " + url);
         } finally {
           manager.returnDownloadPermit(room);
           logger.info("结束下载房间：{}, url:{}", room, url);
